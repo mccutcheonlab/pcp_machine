@@ -18,9 +18,21 @@ class Session(object):
     
     def assign_group(self):
         self.group = self.rowdata[5]
+        if self.group == 'SAL':
+            self.group_numeric = 0
+        elif self.group == 'PCP':
+            self.group_numeric = 1
+        else:
+            self.group_numeric = 2
         
     def lick_analysis(self):
         self.lickdata = jmf.lickCalc(self.licks)
+        
+    def get_session(self):
+        self.sessionN = self.rowdata[3]
+        
+    def get_rat(self):
+        self.rat = self.rowdata[1]
 
 def strip_commas(data_in):
     data_out = []
@@ -47,4 +59,9 @@ for i in sessions:
     x = sessions[i]
     x.assign_group()
     x.lick_analysis()
+    x.get_session()
+    x.get_rat()
+
+
+#trainsessions = sessions[:2]
 
