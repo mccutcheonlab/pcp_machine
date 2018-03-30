@@ -17,7 +17,8 @@ except:
     print('Tensor flow not available - run program from tf environment')
     
 GROUP = ['SAL', 'PCP']    
-    
+CSV_COLUMN_NAMES = ['s', 'nlicks', 'freq', 'bNum', 'bMean', 'group']
+
 def slice_sessions(nsessions, trainN=120):
     
     train_s = random.sample(range(nsessions),trainN)
@@ -26,13 +27,11 @@ def slice_sessions(nsessions, trainN=120):
 
 def assemble_data(sessionNs):
     
-    df = pd.DataFrame([x for x in sessionNs])
-    
-    df.insert(1,'nlicks', [len(sessions[x].licks) for x in sessionNs])
-    df.insert(2,'freq', [sessions[x].lickdata['freq'] for x in sessionNs])
-    df.insert(3,'bNum', [sessions[x].lickdata['bNum'] for x in sessionNs])
-    df.insert(4,'bMean', [sessions[x].lickdata['bMean'] for x in sessionNs])
-    df.insert(5,'group', [sessions[x].group_numeric for x in sessionNs])
+    df = pd.DataFrame([len(sessions[x].licks) for x in sessionNs], columns=['nlicks'])
+    df.insert(1,'freq', [sessions[x].lickdata['freq'] for x in sessionNs])
+    df.insert(2,'bNum', [sessions[x].lickdata['bNum'] for x in sessionNs])
+    df.insert(3,'bMean', [sessions[x].lickdata['bMean'] for x in sessionNs])
+    df.insert(4,'group', [sessions[x].group_numeric for x in sessionNs])
     
     return df
 
@@ -41,7 +40,7 @@ def load_data(y_name='group'):
     
     train = assemble_data(train_s)
     test = assemble_data(test_s)
-    
+
     train_x, train_y = train, train.pop(y_name)
     test_x, test_y = test, test.pop(y_name)
     

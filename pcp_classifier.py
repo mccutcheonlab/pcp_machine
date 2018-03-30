@@ -12,6 +12,8 @@ from __future__ import print_function
 import argparse
 import tensorflow as tf
 
+import numpy as np
+
 import pcp_data
 
 parser = argparse.ArgumentParser()
@@ -25,9 +27,9 @@ def main(argv):
     (train_x, train_y), (test_x, test_y) = pcp_data.load_data()
     
     my_feature_columns = []
-    for key in ['freq', 'bMean']:
+    for key in train_x.keys():
             my_feature_columns.append(tf.feature_column.numeric_column(key=key))
-    
+
     classifier = tf.estimator.DNNClassifier(
         feature_columns=my_feature_columns,
         hidden_units=[10, 10],
@@ -38,13 +40,12 @@ def main(argv):
                                                  args.batch_size),
         steps=args.train_steps)
         
-        
-#        # Evaluate the model.
-#    eval_result = classifier.evaluate(
-#        input_fn=lambda:pcp_data.eval_input_fn(test_x, test_y,
-#                                                args.batch_size))
-#
-#    print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
+        # Evaluate the model.
+    eval_result = classifier.evaluate(
+        input_fn=lambda:pcp_data.eval_input_fn(test_x, test_y,
+                                                args.batch_size))
+
+    print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
 
 if __name__ == '__main__':
     tf.logging.set_verbosity(tf.logging.INFO)
