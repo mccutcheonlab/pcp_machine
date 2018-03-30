@@ -11,15 +11,12 @@ import dill
 
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--batch_size', default=100, type=int, help='batch size')
-parser.add_argument('--train_steps', default=1000, type=int,
-                    help='number of training steps')
-
 try:
     import tensorflow as tf
 except:
     print('Tensor flow not available - run program from tf environment')
+    
+GROUP = ['SAL', 'PCP']    
     
 def slice_sessions(nsessions, trainN=120):
     
@@ -39,6 +36,17 @@ def assemble_data(sessionNs):
     
     return df
 
+def load_data(y_name='group'):
+    train_s, test_s = slice_sessions(len(sessions))
+    
+    train = assemble_data(train_s)
+    test = assemble_data(test_s)
+    
+    train_x, train_y = train, train.pop(y_name)
+    test_x, test_y = test, test.pop(y_name)
+    
+    return (train_x, train_y), (test_x, test_y)
+
 def train_input_fn(features, labels, batch_size):
     """An input function for training"""
     # Convert the inputs to a Dataset.
@@ -46,6 +54,25 @@ def train_input_fn(features, labels, batch_size):
 
     # Shuffle, repeat, and batch the examples.
     dataset = dataset.shuffle(1000).repeat().batch(batch_size)
+
+    # Return the dataset.
+    return dataset
+
+def eval_input_fn(features, labels, batch_size):
+    """An input function for evaluation or prediction"""
+    features=dict(features)
+    if labels is None:
+        # No labels, use only features.
+        inputs = features
+    else:
+        inputs = (features, labels)
+
+    # Convert the inputs to a Dataset.
+    dataset = tf.data.Dataset.from_tensor_slices(inputs)
+
+    # Batch the examples
+    assert batch_size is not None, "batch_size must not be None"
+    dataset = dataset.batch(batch_size)
 
     # Return the dataset.
     return dataset
@@ -62,34 +89,7 @@ except NameError:
     except:
         print('Unable to find pickled file')
         
-def main(argv):
-    args = parser.parse_args(argv[1:])
-    train_s, test_s = slice_sessions(len(sessions))
-    
-    train = assemble_data(train_s)
-    test = assemble_data(test_s)
-    
-    (train_x, train_y) = train, train.pop('group')
-    (test_x, test_y) = test, test.pop('group')
-    
-    my_feature_columns = []
-    for key in train_x.keys():
-            my_feature_columns.append(tf.feature_column.numeric_column(key=key))
-    
-    classifier = tf.estimator.DNNClassifier(
-        feature_columns=my_feature_columns,
-        hidden_units=[10, 10],
-        n_classes=2)
-    
-    print(train_x[:5])
-    
-#    classifier.train(
-#        input_fn=lambda:train_input_fn(train_x, train_y,
-#                                                 args.batch_size),
-#        steps=args.train_steps)
         
-if __name__ == '__main__':
-    tf.logging.set_verbosity(tf.logging.INFO)
-    tf.app.run(main)
+
 
     
