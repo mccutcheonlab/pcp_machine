@@ -24,13 +24,18 @@ except NameError:
     except:
         print('Unable to load or find pickled file. Make sure dill is imported and file location is correct')
 
-def resize_licks(licks):
+def resize_licks(licks, flatten=False):
     try:
         licks = np.reshape(licks,(-1,2))
     except:
         licks = np.reshape(licks[:-1],(-1,2))
     
     licks_resized = transform.resize(licks, (28,28))
+    
+#    if flatten == True:
+#        for px in licks_resized:
+#            
+#        licks_resized = [mean(x)]
     return licks_resized
 
 def slice_sessions(nsessions, trainN=120):   
@@ -41,21 +46,25 @@ def slice_sessions(nsessions, trainN=120):
 def load_data():
     train_s, test_s = slice_sessions(len(sessions))
 
-    train_x = np.array([data[x] for x in train_s])
-    test_x = np.array([data[x] for x in test_s])
+    train_x = np.array([data[x] for x in train_s], dtype=np.float32)
+    test_x = np.array([data[x] for x in test_s], dtype=np.float32)
 
     train_y = np.asarray(pd.DataFrame(
             [sessions[x].group_numeric for x in train_s],
-            columns=['group']), dtype=np.int32)
+            columns=['group']), dtype=np.int32)[:,0]
     
     test_y = np.asarray(pd.DataFrame(
         [sessions[x].group_numeric for x in test_s],
-        columns=['group']), dtype=np.int32)
+        columns=['group']), dtype=np.int32)[:,0]
     
     return (train_x, train_y), (test_x, test_y)
 
 data = []
 for i in range(len(sessions)):
-    data.append(resize_licks(sessions[i].licks))
+    data.append(resize_licks(sessions[i].lickdata['ilis']))
 
+#test = resize_licks(sessions[0].licks)
+#print(test[1,2])
+    
+# Idea - go through sessions, only keeping those with ilis>28x28 then rather than resizing, just change shape
 
