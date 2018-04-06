@@ -86,7 +86,7 @@ def cnn_model_fn(features, labels, mode):
 
 def main(unused_argv):
 #    Load training and eval data  
-    (train_data, train_labels), (eval_data, eval_labels) = pcp_data_cnn.load_data()
+    (train_data, train_labels), (eval_data, eval_labels) = pcp_data_cnn.load_data(datamode='limited')
     
     print(train_labels.dtype)
     print(np.shape(train_labels))

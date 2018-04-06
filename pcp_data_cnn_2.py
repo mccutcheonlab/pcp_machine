@@ -65,5 +65,26 @@ def load_data(datamode='all', datatype='ilis'):
     
     return (train_x, train_y), (test_x, test_y)
 
-(train_x, train_y), (test_x, test_y) = load_data(datamode='limited')
+def convertToOneHot(vector, num_classes=None):
+    """
+    Converts an input 1-D vector of integers into an output
+    2-D array of one-hot vectors, where an i'th input value
+    of j will set a '1' in the i'th row, j'th column of the
+    output array.
+    """
+
+    assert isinstance(vector, np.ndarray)
+    assert len(vector) > 0
+
+    if num_classes is None:
+        num_classes = np.max(vector)+1
+    else:
+        assert num_classes > 0
+        assert num_classes >= np.max(vector)
+
+    result = np.zeros(shape=(len(vector), num_classes))
+    result[np.arange(len(vector)), vector] = 1
+    return result.astype(int)
+
+#(train_x, train_y), (test_x, test_y) = load_data(datamode='limited')
 
